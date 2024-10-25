@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import datetime
-from pycodes.modules.stimulus_utils import rescale_checkerboard
+from pycodes.modules.stimulus_utils import rescale_sequence
 from pycodes.modules import colors
 
 
@@ -339,8 +339,7 @@ def process_sequence(original_stack, rescale_factor_, margin_):
         - margin: margin to be cropped from the sequence (all around)
     """
     # Rescale to have the min number of pixels per check avoiding redundancy
-    sequence_rescaled = rescale_checkerboard(original_stack, n_pixel_per_check_old=rescale_factor_,
-                                             n_pixel_per_check_new=1)
+    sequence_rescaled = rescale_sequence(original_stack, n_pixel_per_check_old=rescale_factor_, n_pixel_per_check_new=1)
 
     # Keep only the portion corresponding to the stimulated area with the spots
     sequence_cropped = sequence_rescaled[:, margin_:-margin_, margin_:-margin_]
