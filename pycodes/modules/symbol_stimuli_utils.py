@@ -57,10 +57,10 @@ def generate_symbol_frame(symbol,
     (symbol_center_x, symbol_center_y,
      symbol_top_left_x, symbol_top_left_y) = symbol_location_check(symbol_center, symbol_size_px, frame_x_size_px, frame_y_size_px)
 
-    square_dim_row_start = symbol_top_left_y
-    square_dim_row_end = symbol_top_left_y + symbol_size_px
-    square_dim_col_start = symbol_top_left_x
-    square_dim_col_end = symbol_top_left_x + symbol_size_px
+    square_dim_row_start = int(symbol_top_left_y)
+    square_dim_row_end = int(symbol_top_left_y + symbol_size_px)
+    square_dim_col_start = int(symbol_top_left_x)
+    square_dim_col_end = int(symbol_top_left_x + symbol_size_px)
 
     if symbol == 'F':
         bar_width = int(symbol_size_px * 0.2)
