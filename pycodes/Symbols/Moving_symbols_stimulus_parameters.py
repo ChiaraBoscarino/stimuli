@@ -6,6 +6,7 @@ pixel_size = 3.5  # in µm per pixel
 
 # - Frequency
 stimulus_frequency = 50  # Hz
+dt = 1 / stimulus_frequency  # timestep of a frame in seconds
 
 # - Stimulation area
 SA_sq_dim = 768  # pixels
