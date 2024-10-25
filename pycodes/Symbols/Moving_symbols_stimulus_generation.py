@@ -1,8 +1,10 @@
 import numpy as np
 import os
+import matplotlib.pyplot as plt
 import Moving_symbols_stimulus_parameters as prm
 from pycodes.modules import general_utils, symbol_stimuli_utils
 
+VISUALIZE_TRAJECTORIES = True
 GENERATE_PARAMETER_FILE = True
 GENERATE_NPY_FILE = True
 GENERATE_BIN_FILE = True
@@ -23,7 +25,7 @@ def main():
 
     # CODE
     # - Output folder creation
-    general_utils.make_dir(stim_type)
+    general_utils.make_dir(os.path.join(root, stim_type))
     general_utils.make_dir(output_folder)
 
     # - Trajectories computation
@@ -43,9 +45,37 @@ def main():
         # append the trajectory to the list of trajectories
         symbol_center_trajectory.append(trj)
 
+    # - Show trajectories
+    if VISUALIZE_TRAJECTORIES:
+        ncols = min(5, len(symbol_center_trajectory))
+        nrows = int(np.ceil(len(symbol_center_trajectory) / ncols))
+        dim = 4
+        fontsize = 12
+        fig = plt.figure(figsize=(ncols*dim, nrows*dim))
+        for i_t, trajectory in enumerate(symbol_center_trajectory):
+            ax = fig.add_subplot(nrows, ncols, i_t+1)
+            ax.set_xlim(0, prm.SA_x_size_px)
+            ax.set_ylim(0, prm.SA_y_size_px)
+            ax.invert_yaxis()  # invert y-axis to have (0, 0) in the top left corner
+            x, y = zip(*trajectory)
+            ax.plot(x, y, '-o', linewidth=1, markersize=17, markerfacecolor='white', color='k')
+            for i_tp, trj_pt in enumerate(trajectory): ax.text(trj_pt[0], trj_pt[1], f"{i_tp}", fontsize=fontsize, ha='center', va='center')
+            ax.set_title(f"Trajectory {i_t+1}", fontsize=fontsize)
+        plt.show()
+
     # - User confirmation
     print(f"\n>> Generating Drifting Gratings stimulus (Version ID {prm.STIMULUS_VERSION_ID})\n"
-          # ADD HERE!!
+          f"\t- Stimulus frequency: {prm.stimulus_frequency} Hz\n"
+          f"\t- Frame size: {prm.SA_x_size_um}x{prm.SA_y_size_um} µm ({prm.SA_x_size_px}x{prm.SA_y_size_px} px)\n"
+          
+          f"\t- Symbols: {prm.symbols}\n"
+          f"\t- Symbol sizes: {prm.symbol_sizes_um} µm ({prm.symbol_sizes_px} px)\n"
+          
+          f"\t- Symbol trajectories: {len(symbol_center_trajectory)} ({np.unique([len(x) for x in symbol_center_trajectory])} points)\n"
+          f"\t- Symbol speeds: {np.array(prm.symbol_speeds)*prm.pixel_size} µm/s ({prm.symbol_speeds} px/s)\n"
+          
+          # f"\t- Total duration of the stimulus: {tot_stim_duration_s//60}'{tot_stim_duration_s%60}s ({tot_stim_duration_frames} frames)\n"
+          
           f"\t- Output folder: {output_folder}\n")
     to_do = "\nWill run:\n"
     if GENERATE_PARAMETER_FILE:
