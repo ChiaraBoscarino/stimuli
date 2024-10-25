@@ -23,9 +23,16 @@ background_color = 0
 # - Movement
 # Trajectories are lists of (x, y) coordinates in the range [0, 1]
 # corresponding to the normalized position of the symbol center on the screen.
-symbol_trajectories = [
-    [(0.5, 0.5), (0.6, 0.3), (0.5, 0.5), (0.6, 0.6), (0.3, 0.7), (0.3, 0.3)],  # Trajectory 1
-]
+symbol_trajectories = {
+    "Trj1": [(0.5, 0.5), (0.6, 0.3), (0.5, 0.5), (0.6, 0.6), (0.3, 0.7), (0.3, 0.3)],
+}
 symbol_speeds = [50]  # pixels/s
+symbol_speeds_um = [int(x*pixel_size) for x in symbol_speeds]  # µm/s
+fixation_time = 0.25  # seconds
+fixation_time_frames = int(fixation_time * stimulus_frequency)  # frames
+
+# - Sequence to sequence transition
+s2s_transition_time = 0.2  # seconds
+s2s_transition_frames = int(s2s_transition_time * stimulus_frequency)  # frames
 
 
