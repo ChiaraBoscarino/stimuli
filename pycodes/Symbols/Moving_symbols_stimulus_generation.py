@@ -1,15 +1,20 @@
 import numpy as np
 import os
 import matplotlib.pyplot as plt
+from tqdm.auto import tqdm
+import pandas as pd
+
 import Moving_symbols_stimulus_parameters as prm
 from pycodes.Symbols.Moving_symbols_stimulus_parameters import stimulus_frequency
-from pycodes.modules import general_utils, symbol_stimuli_utils
+from pycodes.modules import general_utils, symbol_stimuli_utils, gif
 
 VISUALIZE_TRAJECTORIES = True
 GENERATE_PARAMETER_FILE = True
 GENERATE_NPY_FILE = True
-GENERATE_BIN_FILE = True
-GENERATE_VEC_FILE = True
+GENERATE_BIN_FILE = False
+GENERATE_VEC_FILE = False
+
+# TO CONTINUE: MISSING BIN FILE AND VEC FILE !!!!!!!!!!!!!!!!!!1
 
 
 def main():
@@ -18,11 +23,14 @@ def main():
     root = 'C:\\Users\\chiar\\Documents\\stimuli'
     stim_type = 'MovingSymbols'
     output_folder = os.path.join(root, stim_type, prm.STIMULUS_VERSION_ID)
+    files_folder = os.path.join(output_folder, "files")
     # - trajectories file
     trajectories_fp = os.path.join(output_folder, f"{prm.STIMULUS_VERSION_ID}_trajectories.pkl")
     # - parameters file
     param_source_fp = os.path.join(root, "pycodes", "Symbols", "Moving_symbols_stimulus_parameters.py")
     param_dest_fp = os.path.join(str(output_folder), f"{prm.STIMULUS_VERSION_ID}_parameters.py")
+    # - reference file
+    ref_vec_fp = os.path.join(output_folder, f"{prm.STIMULUS_VERSION_ID}_reference_table.csv")
     # - vec file
     vec_fp = os.path.join(output_folder, f"{prm.STIMULUS_VERSION_ID}.vec")
 
@@ -30,6 +38,7 @@ def main():
     # - Output folder creation
     general_utils.make_dir(os.path.join(root, stim_type))
     general_utils.make_dir(output_folder)
+    general_utils.make_dir(files_folder)
 
     # - Trajectories computation
     # -- Trajectory point sequence
@@ -107,7 +116,7 @@ def main():
                      f"\t- Symbols: {prm.symbols}\n"
                      f"\t- Symbol sizes: {prm.symbol_sizes_um} µm ({prm.symbol_sizes_px} px)\n"
                      f"\n"
-                     f"\t- Symbol trajectories: {len(symbol_center_trajectory)} ({np.unique([len(x) for x in symbol_center_trajectory])} points)\n"
+                     f"\t- Symbol trajectories: {len(symbol_center_trajectory)} ({np.unique([len(x) for x in symbol_center_trajectory.values()])} points)\n"
                      f"\t- Symbol speeds: {prm.symbol_speeds_um} µm/s ({prm.symbol_speeds} px/s)\n"
                      f"\t- Fixation time: {prm.fixation_time} s ({prm.fixation_time_frames} frames)\n"
                      f"\t- Trajectories duration: {trj_duration} [speed (px/s): trj_x_dur (s)]\n"
@@ -141,12 +150,47 @@ def main():
         shutil.copy(param_source_fp, param_dest_fp)
 
         with open(param_dest_fp, "a") as f:
-            f.write('"""'+report_string+'"""')
+            f.write('"""\n\n'+report_string+'\n\n"""')
 
     if GENERATE_NPY_FILE:
         print("Generating npy file")
 
-        # Trajectory
+        sid = 0
+        ref_vec = {'sid': [], 'symbol': [], 'speed': [], 'size': [], 'trajectory': []}
+        for symbol in prm.symbols:
+            for speed, trajectories in full_trajectories.items():
+                for size in prm.symbol_sizes_px:
+                    print(f"Processing symbol {symbol}, speed {speed} px/s, size {size} px")
+                    for trx_name, trx in tqdm(trajectories.items()):
+
+                        # Generate and store stack of frames
+                        npy_stack_frames = np.array([
+                            symbol_stimuli_utils.generate_symbol_frame(symbol, prm.SA_x_size_px, prm.SA_y_size_px, size,
+                                                                       symb_center, prm.symbol_color, prm.background_color)
+                            for symb_center in trx
+                        ])
+                        npy_stack_frames_fn = f"{sid}_MS_seq.npy"
+                        npy_stack_frames_fp = os.path.join(files_folder, npy_stack_frames_fn)
+                        np.save(npy_stack_frames_fp, npy_stack_frames)
+
+                        # Update reference vector
+                        ref_vec['sid'].append(sid)
+                        ref_vec['symbol'].append(symbol)
+                        ref_vec['speed'].append(speed)
+                        ref_vec['size'].append(size)
+                        ref_vec['trajectory'].append(trx_name)
+
+                        # Visualize sequence (store gif file)
+                        gif_name = f"{sid}_{symbol}_speed_{speed}_size_{size}_{trx_name}.gif"
+                        gif_fp = os.path.join(files_folder, gif_name)
+                        gif.create_gif(npy_stack_frames, gif_fp, dt=prm.dt * 1000, loop=1)
+
+                        sid += 1
+
+        ref_vec = pd.DataFrame(ref_vec)
+        ref_vec.to_csv(ref_vec_fp, index=False)
+        print(f"Generated {sid} sequences")
+        print(f"Saved reference vector to {ref_vec_fp}")
 
     if GENERATE_BIN_FILE:
         print("Generating bin file")
