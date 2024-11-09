@@ -8,16 +8,16 @@ from pycodes.modules.gif import create_gif
 from pycodes.modules import general_utils
 
 # Code parameters
-show_DG_parameters = False
+show_DG_parameters = True
 
-generate_npy_stack_frames = False
-show_all_frames = False
+generate_npy_stack_frames = True
+show_all_frames = True
 
-generate_bin_file = False
+generate_bin_file = True
 
-generate_vec = False
+generate_vec = True
 
-generate_report_sequence = False
+generate_report_sequence = True
 
 
 def propagation_vector(direction, L):
@@ -49,7 +49,7 @@ def main():
 
     # --------------------------------------- SET PARAMETERS --------------------------------------------- #
     # DG VERSION
-    Version = "v2_MEA1"
+    Version = "v3_MEA1"
 
     # Setup
     RIG_ID = 1
@@ -61,26 +61,27 @@ def main():
         raise ValueError("RIG_ID not recognized")
 
     # Direction
-    N_directions = 4  # Number of directions
+    N_directions = 1  # Number of directions
     directions = np.arange(0, 360, 360 / N_directions)
 
     # NB: a cycle is a full period of the wave, i.e. 2*pi
     # since we are using sin, it is from the start of the black to the end of the white
 
     # Spatial frequency
-    wavelenghts_cpd = [0.1, 0.045, 0.03, 0.02, 0.012]  # in cycles per degree (how many full cycles in 1 degree of visual angle)
-    um_per_deg = 32  # in micrometers per degree (projection of 1 deg of visual angle on the mouse retina)
-    wavelengths_ppc = [int(convert_cpd_to_ppc(x, um_per_deg, pixel_size)) for x in wavelenghts_cpd]  # in px/cycle (how many pixels per cycle)
+    # wavelenghts_cpd = [0.1, 0.045, 0.03, 0.02, 0.012]  # in cycles per degree (how many full cycles in 1 degree of visual angle)
+    # um_per_deg = 32  # in micrometers per degree (projection of 1 deg of visual angle on the mouse retina)
+    # wavelengths_ppc = [int(convert_cpd_to_ppc(x, um_per_deg, pixel_size)) for x in wavelenghts_cpd]  # in px/cycle (how many pixels per cycle)
+    wavelengths_ppc = [57, 91, 203, 304, 457]  # in px/cycle
 
     # Temporal frequency
     wave_speeds = [50, 100, 150]  # in px/s
 
     # Sequences
     N_seq_tot = N_directions * len(wavelengths_ppc) * len(wave_speeds)
-    N_repetitions = 8
+    N_repetitions = 4
 
     # Duration of the stimulus
-    Tot_dur = 2  # seconds
+    Tot_dur = 40  # seconds
     stimulus_frequency = 50  # Hz
     dt = 1 / stimulus_frequency  # timestep of a frame in seconds
     # t = np.arange(0, Tot_dur, dt)  # time vector
