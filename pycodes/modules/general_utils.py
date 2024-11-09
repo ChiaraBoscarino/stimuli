@@ -232,7 +232,7 @@ def shift(matrix, n, how, fv):
 #     TO AND FROM FILE
 # ----------------------------------------------------------------------------------------------------------------------
 
-def save_figure(fig, filename, figuredir, remove_blank_space=False):
+def save_figure(fig, filename, figuredir, remove_blank_space=False, verbose=False):
     """Save a figure in the specified directory"""
     filepath = os.path.join(figuredir, filename)
     if remove_blank_space:
@@ -240,6 +240,9 @@ def save_figure(fig, filename, figuredir, remove_blank_space=False):
     else:
         fig.savefig(filepath)
     plt.close(fig)
+    if verbose:
+        print(f"Saved figure: {filepath}")
+    return
 
 
 def load_df(csv_path, index_col='', name='', verbose=False):
@@ -306,6 +309,13 @@ def load_json(path):
     data = json.load(f)
     f.close()
     return data
+
+
+def write_json(json_dict, path):
+    """Write a dictionary to a .json file"""
+    with open(path, "w") as out_file:
+        json.dump(json_dict, out_file, indent=4)
+    return
 
 
 def generate_dictionary_from_csv(dir_name, extension='.csv', delimiter=','):
