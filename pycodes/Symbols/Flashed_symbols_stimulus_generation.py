@@ -17,7 +17,7 @@ VISUALIZE_STIMULUS_GIF = True
 # ---------------------------------------------------------------------------------------------- #
 # >> PARAMETERS
 rootpath = "C:\\Users\\chiar\\Documents\\stimuli"
-output_root_folder = rootpath
+output_root_folder = os.path.join(rootpath, "FlashedSymbols")
 
 set_of_params = {
     "STIMULUS_VERSION_ID": "FlashedSymbols_67_300ms",
