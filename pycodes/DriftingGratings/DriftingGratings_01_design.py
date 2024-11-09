@@ -101,7 +101,7 @@ def main():
     tot_stim_duration = Tot_dur * N_repetitions * len(directions) * len(wavelengths_ppc) * len(wave_speeds)
 
     # Source/Output folders
-    output_folder = "C:\\Users\\chiar\\Documents\\rgc_typing\\stimuli\\DriftingGratings"
+    output_folder = "C:\\Users\\chiar\\Documents\\stimuli\\DriftingGratings"
     general_utils.make_dir(output_folder)
     output_folder = os.path.join(output_folder, f"DG_{Version}")
     files_folder = os.path.join(output_folder, "files")
