@@ -7,18 +7,52 @@ import pandas as pd
 from pycodes.modules.gif import create_gif
 from pycodes.modules import general_utils
 
-# Code parameters
+# ---------------------------------------------------------------------------------------------- #
+# >> CODE MODULATORS
 show_DG_parameters = True
-
 generate_npy_stack_frames = True
 show_all_frames = True
-
 generate_bin_file = True
-
 generate_vec = True
-
 generate_report_sequence = True
+# ---------------------------------------------------------------------------------------------- #
 
+# ---------------------------------------------------------------------------------------------- #
+# >> PARAMETERS
+Version = "v3_MEA1"
+RIG_ID = 1
+
+# Direction
+N_directions = 1  # Number of directions
+
+# NB: a cycle is a full period of the wave, i.e. 2*pi
+# since we are using sin, it is from the start of the black to the end of the white
+
+# Spatial frequency
+# wavelenghts_cpd = [0.1, 0.045, 0.03, 0.02, 0.012]  # in cycles per degree (how many full cycles in 1 degree of visual angle)
+# um_per_deg = 32  # in micrometers per degree (projection of 1 deg of visual angle on the mouse retina)
+# wavelengths_ppc = [int(convert_cpd_to_ppc(x, um_per_deg, pixel_size)) for x in wavelenghts_cpd]  # in px/cycle (how many pixels per cycle)
+wavelengths_ppc = [57, 91, 203, 304, 457]  # in px/cycle
+
+# Temporal frequency
+wave_speeds = [50, 100, 150]  # in px/s
+
+# Sequences
+N_repetitions = 4
+
+# Duration of the stimulus
+Tot_dur = 40  # seconds
+stimulus_frequency = 50  # Hz
+
+# Image
+frame_x_size_px = 768
+frame_y_size_px = 768
+
+# ---------------------------------------------------------------------------------------------- #
+
+
+# ---------------------------------------------------------------------------------------------- #
+# >> FUNCTIONS
 
 def propagation_vector(direction, L):
     """ Compute the propagation vector for a given direction and spatial frequency.
@@ -44,15 +78,11 @@ def get_stack_name(direction, L, s):
     f = s / L  # Temporal frequency in Hz
     return f"DG_{int(direction)}deg_{int(L)}ppc_{int(s)}pxs_{int(f)}Hz"
 
+# ---------------------------------------------------------------------------------------------- #
+
 
 def main():
 
-    # --------------------------------------- SET PARAMETERS --------------------------------------------- #
-    # DG VERSION
-    Version = "v3_MEA1"
-
-    # Setup
-    RIG_ID = 1
     if RIG_ID == 1 or RIG_ID == 2:
         pixel_size = 3.5  # in micrometers per pixel
     elif RIG_ID == 3:
@@ -60,38 +90,15 @@ def main():
     else:
         raise ValueError("RIG_ID not recognized")
 
-    # Direction
-    N_directions = 1  # Number of directions
     directions = np.arange(0, 360, 360 / N_directions)
 
-    # NB: a cycle is a full period of the wave, i.e. 2*pi
-    # since we are using sin, it is from the start of the black to the end of the white
-
-    # Spatial frequency
-    # wavelenghts_cpd = [0.1, 0.045, 0.03, 0.02, 0.012]  # in cycles per degree (how many full cycles in 1 degree of visual angle)
-    # um_per_deg = 32  # in micrometers per degree (projection of 1 deg of visual angle on the mouse retina)
-    # wavelengths_ppc = [int(convert_cpd_to_ppc(x, um_per_deg, pixel_size)) for x in wavelenghts_cpd]  # in px/cycle (how many pixels per cycle)
-    wavelengths_ppc = [57, 91, 203, 304, 457]  # in px/cycle
-
-    # Temporal frequency
-    wave_speeds = [50, 100, 150]  # in px/s
-
-    # Sequences
     N_seq_tot = N_directions * len(wavelengths_ppc) * len(wave_speeds)
-    N_repetitions = 4
 
-    # Duration of the stimulus
-    Tot_dur = 40  # seconds
-    stimulus_frequency = 50  # Hz
     dt = 1 / stimulus_frequency  # timestep of a frame in seconds
     # t = np.arange(0, Tot_dur, dt)  # time vector
     N_frames = Tot_dur * stimulus_frequency  # Number of frames
     tot_frames = N_frames * len(directions) * len(wavelengths_ppc) * len(wave_speeds)
     tot_stim_duration = Tot_dur * N_repetitions * len(directions) * len(wavelengths_ppc) * len(wave_speeds)
-
-    # Image
-    frame_x_size_px = 768
-    frame_y_size_px = 768
 
     # Source/Output folders
     output_folder = "C:\\Users\\chiar\\Documents\\rgc_typing\\stimuli\\DriftingGratings"
@@ -100,11 +107,30 @@ def main():
     files_folder = os.path.join(output_folder, "files")
     general_utils.make_dir(output_folder)
     general_utils.make_dir(files_folder)
+    param_path = os.path.join(output_folder, f"parameters.json")
     stimulus_name = f"DG_stack_frames_{Version}_{stimulus_frequency}Hz"
     binfile_fp = os.path.join(output_folder, f"{stimulus_name}.bin")
     ref_vec_fp = os.path.join(output_folder, f"ref_vec_{stimulus_name}.csv")
     vec_fp = os.path.join(output_folder, f"vec_{stimulus_name}.vec")
     report_fp = os.path.join(output_folder, f"report_sequence_{stimulus_name}.csv")
+
+    # Parameter file
+    set_of_params = {
+        "Version": Version,
+        "RIG_ID": RIG_ID,
+        "pixel_size": pixel_size,
+        "directions": list(directions),
+        "wavelengths_ppc": wavelengths_ppc,
+        "wave_speeds": wave_speeds,
+        "sequence_duration": Tot_dur,
+        "N_repetitions": N_repetitions,
+        "total_n_sequences": N_seq_tot,
+        "stimulus_frequency": stimulus_frequency,
+        "tot_stim_duration": tot_stim_duration,
+        "frame_x_size_px": frame_x_size_px,
+        "frame_y_size_px": frame_y_size_px
+    }
+    general_utils.write_json(set_of_params, param_path)
 
     # ------------------------------------------------------------------------------------------ #
 
