@@ -1,4 +1,5 @@
 */__pycache__/*.pyc
 *.pyc
 MovingSymbols/
-FlashedSymbols/FlashedSymbols_67_300ms/
+FlashedSymbols/
+DriftingGratings/
