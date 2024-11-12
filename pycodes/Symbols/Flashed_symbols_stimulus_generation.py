@@ -20,7 +20,7 @@ rootpath = "C:\\Users\\chiar\\Documents\\stimuli"
 output_root_folder = os.path.join(rootpath, "FlashedSymbols")
 
 set_of_params = {
-    "STIMULUS_VERSION_ID": "FlashedSymbols_67_300ms",
+    "STIMULUS_VERSION_ID": "FlashedSymbols_67_300ms_TopRight",
     "RIG_ID": 1,
     "mea_size": 1530,  # in µm
 
@@ -31,9 +31,9 @@ set_of_params = {
 
     "symbols": ['F', 'T', 'I'],
     "symbol_sizes_um": [150, 300, 450],  # µm
-    "symbol_locations": {"150um": [(0.4, 0.4), (0.4, 0.6), (0.6, 0.4), (0.6, 0.6)],
-                         "300um": [(0.4, 0.4), (0.6, 0.6)],
-                         "450um": [(0.5, 0.5)]},
+    "symbol_locations": {"150um": [(0.37, 0.37), (0.37, 0.63), (0.63, 0.37), (0.63, 0.63)],
+                         "300um": [(0.37, 0.37), (0.37, 0.63), (0.63, 0.37), (0.63, 0.63)],
+                         "450um": [(0.37, 0.37), (0.37, 0.63), (0.63, 0.37), (0.63, 0.63)]},
     "onset_time": 0.067,  # seconds
     "offset_time": 0.300,  # seconds
     "initial_adaptation": 1,  # seconds
@@ -49,6 +49,8 @@ set_of_params = {
 
 def main():
     parameters = set_of_params
+    parameters["STIMULUS_VERSION_ID"] = f"{parameters['STIMULUS_VERSION_ID']}_{parameters['stimulus_frequency']}Hz"
+
     Stimulus_ID = parameters["STIMULUS_VERSION_ID"]
     RIG_ID = parameters["RIG_ID"]
     mea_size = parameters["mea_size"]
@@ -86,13 +88,11 @@ def main():
     tot_n_frames = initial_adaptation_frames + tot_seqs * single_sequence_duration_frames  # frames
 
     output_folder = os.path.join(output_root_folder, Stimulus_ID)
-    general_utils.make_dir(output_folder)
     param_path = os.path.join(output_folder, f"{Stimulus_ID}_parameters.json")
     frame_stack_fp = os.path.join(output_folder, f"{Stimulus_ID}_frame_stack.npy")
     file_bin_fp = os.path.join(output_folder, f"{Stimulus_ID}_frame_stack.bin")
     reference_table_fp = os.path.join(output_folder, f"{Stimulus_ID}_reference_table.csv")
     vec_fp = os.path.join(output_folder, f"{Stimulus_ID}_vec.vec")
-    general_utils.write_json(parameters, param_path)
 
     # ---------------------------------------------------------------------------------------------- #
     # >> CODE
@@ -115,7 +115,7 @@ def main():
         ax.add_patch(plt.Rectangle((SA_center_x-mea_size/2, SA_center_y-mea_size/2), mea_size, mea_size, alpha=0.2))
     plt.tight_layout()
     plt.show()
-    general_utils.save_figure(fig, f"{Stimulus_ID}_symbol_locations.jpg", output_folder)
+    fig_locs = fig
 
     # - Summary
     print(f"\n\nGENERATING STIMULUS: {Stimulus_ID}")
@@ -138,6 +138,10 @@ def main():
     if ok.lower() != "y":
         print("Aborted.")
         return
+
+    general_utils.make_dir(output_folder)
+    general_utils.write_json(parameters, param_path)
+    general_utils.save_figure(fig_locs, f"{Stimulus_ID}_symbol_locations.jpg", output_folder)
 
     # - GENERATE NPY
     if GENERATE_NPY:
