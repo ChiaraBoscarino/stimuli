@@ -19,7 +19,7 @@ VISUALIZE_STIMULUS_GIF = True
 
 # ---------------------------------------------------------------------------------------------- #
 # >> PARAMETERS
-rootpath = "C:\\Users\\chiar\\Documents\\stimuli"
+rootpath = "I:\\STIMULI"
 output_root_folder = os.path.join(rootpath, "MovingSymbols")
 
 set_of_params = {
