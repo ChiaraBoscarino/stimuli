@@ -9,11 +9,11 @@ from pycodes.modules import gif
 
 # ---------------------------------------------------------------------------------------------- #
 # >> CODE MODULATORS
-VISUALIZE_TRAJECTORIES = False
-GENERATE_NPY = False
-STORE_SINGLE_SEQUENCE_GIF = False
-GENERATE_BIN = False
-GENERATE_VEC = False
+VISUALIZE_TRAJECTORIES = True
+GENERATE_NPY = True
+STORE_SINGLE_SEQUENCE_GIF = True
+GENERATE_BIN = True
+GENERATE_VEC = True
 VISUALIZE_STIMULUS_GIF = True
 # ---------------------------------------------------------------------------------------------- #
 
@@ -23,7 +23,7 @@ rootpath = "C:\\Users\\chiar\\Documents\\stimuli"
 output_root_folder = os.path.join(rootpath, "MovingSymbols")
 
 set_of_params = {
-    "STIMULUS_VERSION_ID": "MovingSymbols_horizontal",
+    "STIMULUS_VERSION_ID": "MovingSymbols_DiagonalLB2TR",
     "RIG_ID": 1,
     "mea_size": 1530,  # in µm
 
@@ -43,13 +43,14 @@ set_of_params = {
     # corresponding to the normalized position of the symbol center on the screen.
     "symbol_trajectories": {
                 # "Trj1": [(0.5, 0.5), (0.6, 0.3), (0.5, 0.5), (0.6, 0.6), (0.3, 0.7), (0.3, 0.3)],
-                "Horizontal": [(0.1, 0.5), (0.9, 0.5)]
+                # "Horizontal": [(0.15, 0.37), (0.85, 0.37)],
+                "Diagonal": [(0.2, 0.8), (0.8, 0.2)],
                 },
     "symbol_speeds": [50],  # pixels/s
     "fixation_time": 0,  # seconds
     "s2s_transition_time": 0,  # seconds
 
-    "initial_adaptation": 0.33,  # seconds
+    "initial_adaptation": 0,  # seconds
 
     "n_repetitions": 20
 }
@@ -61,6 +62,8 @@ def main():
 
     # ---------------------------------------------------------------------------------------------- #
     parameters = set_of_params
+    parameters["STIMULUS_VERSION_ID"] = f"{parameters['STIMULUS_VERSION_ID']}_{parameters['stimulus_frequency']}Hz"
+
     Stimulus_ID = parameters["STIMULUS_VERSION_ID"]
     RIG_ID = parameters["RIG_ID"]
     mea_size = parameters["mea_size"]
@@ -98,16 +101,13 @@ def main():
     tot_seqs = n_sequences * nreps
 
     output_folder = os.path.join(output_root_folder, Stimulus_ID)
-    general_utils.make_dir(output_folder)
     param_path = os.path.join(output_folder, f"{Stimulus_ID}_parameters.json")
     files_folder = os.path.join(output_folder, "files")
-    general_utils.make_dir(files_folder)
     trajectories_fp = os.path.join(output_folder, f"{Stimulus_ID}_trajectories.pkl")
     bin_frame_stack_fp = os.path.join(output_folder, f"{Stimulus_ID}_bin_frame_stack.npy")
     file_bin_fp = os.path.join(output_folder, f"{Stimulus_ID}_frame_stack.bin")
     reference_table_fp = os.path.join(output_folder, f"{Stimulus_ID}_reference_table.csv")
     vec_fp = os.path.join(output_folder, f"{Stimulus_ID}_vec.vec")
-    general_utils.write_json(parameters, param_path)
 
     if 0 <= symbol_color < 255 and 0 <= background_color < 255:
         dtype = np.uint8
@@ -134,6 +134,7 @@ def main():
         symbol_center_trajectory[trj_name] = trj
 
     # -- Show trajectories
+    fig_traj = None
     if VISUALIZE_TRAJECTORIES:
         ncols = 2
         nrows = len(symbol_center_trajectory)
@@ -169,8 +170,9 @@ def main():
                 for i_tp, trj_pt in enumerate(trajectory):
                     ax.add_patch(plt.Rectangle((trj_pt[0] - symbol_size_px / 2, trj_pt[1] - symbol_size_px / 2), symbol_size_px, symbol_size_px, color='k', linewidth=1, fill=False))
 
+        fig.subplots_adjust(hspace=0.5, wspace=0.5)
         plt.show()
-        general_utils.save_figure(fig, f"Trajectories.jpg", output_folder)
+        fig_traj = fig
 
     # -- Compute full trajectories
     full_trajectories = {}
@@ -234,6 +236,11 @@ def main():
         return
 
     # ---------------------------------------------------------------------------------------------- #
+    general_utils.make_dir(output_folder)
+    general_utils.make_dir(files_folder)
+    general_utils.write_json(parameters, param_path)
+    if fig_traj is not None: general_utils.save_figure(fig_traj, f"Trajectories.jpg", output_folder)
+
     # >> STIMULUS GENERATION
 
     # - Store trajectories
