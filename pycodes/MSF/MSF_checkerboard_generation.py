@@ -7,6 +7,7 @@ import copy
 
 from pycodes.modules.binfile import *
 from pycodes.modules.general_utils import *
+from pycodes.modules import stimulus_utils
 
 
 def generate_2d_white_noise_frame(dimensions=(768, 768), seed=0):
@@ -117,10 +118,11 @@ Creates a stimulus composed of the classic checkerboard (cc) and the Multi Scale
 
 
 """
-gen_cc_npy = True
-gen_msc_npy = True
-gen_bin = True
-gen_vec = True
+gen_cc_npy = False
+gen_msc_npy = False
+gen_bin = False
+gen_vec = False
+gen_complete_seq_per_sta = True
 
 # Parameters
 
@@ -130,7 +132,8 @@ msf_id = f"MSF_checkerboard_V10_MEA1_{stimulus_random_number}"
 root = "C:\\Users\\chiar\\Documents\\rgc_typing"  # !! SET THIS for windows
 # root = r'/home/idv-equipe-s8/Documents/GitHub/rgc_typing'  # !! SET THIS for linux
 stimuli_dir = os.path.join(root, 'stimuli')
-msf_dir = os.path.join(stimuli_dir, msf_id)
+# msf_dir = os.path.join(stimuli_dir, msf_id)
+msf_dir = "I:\\STIMULI\\MSF\\MSF_checkerboard_V10_MEA1_4Hz"
 files_dir = str(os.path.join(msf_dir, "files"))
 make_dir(msf_dir)
 make_dir(files_dir)
@@ -144,12 +147,14 @@ cc_check_size_mum = 56  # µm
 cc_n_non_rep_seq = 90  # sequences
 cc_n_frames_in_rep_seq = 60  # images
 cc_n_frames_in_non_rep_seq = 90  # images
+cc_n_frames_full_seq = cc_n_frames_in_rep_seq + cc_n_frames_in_non_rep_seq
 
 # MSF checkerboard
 msc_check_sizes_mum = [56, 112, 224, 448, 896, 1344]  # µm (list)
 msc_n_non_rep_seq = 90  # sequences
 msc_n_frames_in_rep_seq = 60  # images
 msc_n_frames_in_non_rep_seq = 90  # images
+msc_n_frames_full_seq = msc_n_frames_in_rep_seq + msc_n_frames_in_non_rep_seq
 
 # vec
 n_blocks = 3
@@ -158,6 +163,14 @@ framerate = 4
 # Hardcoded parameters: don't change without adapting the codes accordingly
 cc_n_rep_seq = 1  # sequences
 msc_n_rep_seq = 1  # sequences
+cc_total_n_seq = cc_n_rep_seq + cc_n_non_rep_seq
+msc_total_n_seq = msc_n_rep_seq + msc_n_non_rep_seq
+cc_repeated_id = 0
+msc_repeated_id = cc_total_n_seq
+# print(f"cc non rep: {cc_n_rep_seq} to {cc_total_n_seq - 1}")
+# print(f"msc non rep: {cc_total_n_seq + msc_n_rep_seq} to {cc_total_n_seq + msc_total_n_seq - 1}")
+cc_non_repeated_id = [i for i in range(cc_n_rep_seq, cc_total_n_seq)]
+msc_non_repeated_id = [cc_total_n_seq+i for i in range(msc_n_rep_seq, msc_total_n_seq)]
 
 # Compute params
 cc_check_size = int(round(cc_check_size_mum / pixel_size))
@@ -189,6 +202,7 @@ msc_n_seq_by_block = int(msc_n_frames_in_non_rep_seq / n_blocks)
 
 # Generate and save cc images as .npy
 if gen_cc_npy:
+    print("Generating npy for cc...")
 
     # Repeated sequences
     for i_sequence in tqdm(range(0, cc_n_rep_seq), desc='Create cc repeated sequences'):
@@ -213,6 +227,7 @@ if gen_cc_npy:
 
 # Generate and save msc images as .npy
 if gen_msc_npy:
+    print("Generating npy for msc...")
 
     # Generate repeated sequence
 
@@ -245,7 +260,7 @@ if gen_msc_npy:
             upsampled_frame = upscale_2D_frame(frame,
                                                n_pixels)  # If the checks are not the smallest size, upscale the frame so that it matches the intermediate root dimension
 
-            # Randomly draw x and y axis tilts
+            # Randomly draw x and yaxis tilts
             np.random.seed(seed_for_tilts)
             xtilt = np.random.randint(0, int(n_pixels / msc_smallest_tilt)) * msc_smallest_tilt  # in pixels
             seed_for_tilts += 1
@@ -316,9 +331,11 @@ if gen_msc_npy:
 
 
 # Write all the frames in a bin file
+bin_fp = os.path.join(msf_dir, f"{msf_id}_{framerate}Hz.bin")
 if gen_bin:
+    print("Generating bin...")
 
-    bin_file = BinFile(os.path.join(msf_dir, f"{msf_id}_{framerate}Hz.bin"),
+    bin_file = BinFile(bin_fp,
                        n_pixels,
                        n_pixels,
                        nb_images=n_images_total,
@@ -343,14 +360,11 @@ if gen_bin:
 
 
 # Generate the vec file
+vec_fp = os.path.join(msf_dir, f"{msf_id}_{framerate}Hz.vec")
 if gen_vec:
+    print("Generating vec...")
 
-    cc_repeated_id = 0
-    msc_repeated_id = cc_n_non_rep_seq + msc_n_rep_seq
-    cc_non_repeated_id = [i for i in range(cc_n_rep_seq, cc_n_non_rep_seq + cc_n_rep_seq)]
-    msc_non_repeated_id = [i for i in range(cc_n_non_rep_seq + msc_n_rep_seq + 1,
-                                            cc_n_non_rep_seq + msc_n_rep_seq + msc_n_non_rep_seq + 1)]
-
+    # >> Prepare the sequences
     cc_nr_tmp = copy.deepcopy(cc_non_repeated_id)
     msc_nr_tmp = copy.deepcopy(msc_non_repeated_id)
 
@@ -370,11 +384,10 @@ if gen_vec:
             sequences += [msc_nr_tmp[0]]
             msc_nr_tmp = msc_nr_tmp[1:]
 
+    # >> Iterate sequences and build vec + checkerboard sequences
     sequences_to_vec = []
     frames_to_vec = []
-
-    for sequence in sequences:
-
+    for sequence in tqdm(sequences):
         # Update sequence to vec
         if sequence == cc_repeated_id:
             sequences_to_vec += cc_n_frames_in_rep_seq * [sequence]
@@ -384,6 +397,7 @@ if gen_vec:
             sequences_to_vec += cc_n_frames_in_non_rep_seq * [sequence]
         elif sequence in msc_non_repeated_id:
             sequences_to_vec += msc_n_frames_in_non_rep_seq * [sequence]
+
         else:
             raise ValueError
 
@@ -407,6 +421,7 @@ if gen_vec:
 
         # print(sequence, len(frames_to_vec))
 
+    # >> Adjust vec file and store
     # Create the vec array
     vec = np.empty((n_frames_displayed + 1, 5))
 
@@ -419,7 +434,72 @@ if gen_vec:
     vec[1:, 4] = sequences_to_vec
 
     # write the vec array in a .vec file
-    with open(f"{msf_dir}/{msf_id}_{framerate}Hz.vec", "w") as f:
+    with open(vec_fp, "w") as f:
         np.savetxt(f, vec, delimiter=',', fmt='%i %i %i %i %i')
 
     print(f"The stimulus is composed of {n_frames_displayed} frames and lasts {n_frames_displayed / framerate / 60}min if displayed at {framerate}Hz.")
+
+
+# Generate the complete sequences for the STA
+vec_fp_source = os.path.join(msf_dir, "MSF_checkerboard_V10_MEA1_556653_4Hz.vec")
+cc_checkerboard_sequence_sta_fp = os.path.join(msf_dir, "cc_checkerboard_non_rep_all.npy")
+msc_checkerboard_sequence_sta_fp = os.path.join(msf_dir, "msc_checkerboard_non_rep_all.npy")
+if gen_complete_seq_per_sta:
+    print("Generating complete sequences for the STA...")
+
+    # >> Prepare the parameters for the complete sequences generation
+    # Define the rescaling factor
+    #       for the CC just 1 px per check (so old = cc_check_size, new = 1)
+    #       for the MSC to the smallest common divisor of check sizes in pixels (so old = msc_common_size, new = 1)
+    msc_check_sizes_px, msc_check_sizes_counts = stimulus_utils.get_msc_sizes(str(files_dir))  # px (list)
+    msc_check_sizes_um = np.array(msc_check_sizes_px) * pixel_size  # µm
+    if not np.array_equal(msc_check_sizes_um, msc_check_sizes_mum):
+        raise ValueError("The expected and the retrieved check sizes are different")
+    msc_common_size = np.gcd.reduce(msc_check_sizes_px.astype(int))
+
+    # >> Extract the sequences from vec
+    vec_file = np.genfromtxt(vec_fp_source)
+    tot_num_frames = int(vec_file[0, 1])
+    frame_index_sequence = vec_file[1:, 1]
+    sequences_ids_repeated = vec_file[1:, 4]
+    if tot_num_frames != len(frame_index_sequence):
+        raise ValueError("The number of frames in the .vec file is different from the one indicated in the header")
+    sequences_ids = []
+    previous = None
+    for x in sequences_ids_repeated:
+        if (previous is not None
+                and x != previous):
+            sequences_ids.append(int(x))
+        previous = x
+
+    # >> Iterate sequences and build vec + checkerboard sequences
+    cc_checkerboard_non_rep_all = []
+    msc_checkerboard_non_rep_all = []
+    for sequence in tqdm(sequences_ids, desc="Building complete sequences"):
+        # Update sequence to vec
+        if sequence == cc_repeated_id or sequence == msc_repeated_id:
+            continue
+        elif sequence in cc_non_repeated_id:
+            # add the sequence to the cc_checkerboard_non_rep_all list
+            fp = os.path.join(str(files_dir), f"cc_sequence_{sequence}.npy")
+            checkerboard_sequence = stimulus_utils.get_checkerboard_sequence(fp, rescale=True,
+                                                                             n_pixel_per_check_old=cc_check_size,
+                                                                             n_pixel_per_check_new=1)
+            cc_checkerboard_non_rep_all.append(checkerboard_sequence)
+        elif sequence in msc_non_repeated_id:
+            # add the sequence to the msc_checkerboard_non_rep_all list
+            # NB: since the msc sequences are stored with seq_id going from 0 (the repeated one) to 90,
+            #       but in the vec file their id are shifted ahead after the cc (+ cc_total_n_seq),
+            #       then going from 91 (the repeated one) to 181, we remap the ids to correctly retrieve the sequence files
+            fp = os.path.join(str(files_dir), f"msc_sequence_{sequence - cc_total_n_seq}.npy")
+            checkerboard_sequence = stimulus_utils.get_checkerboard_sequence(fp, rescale=True,
+                                                                             n_pixel_per_check_old=msc_common_size,
+                                                                             n_pixel_per_check_new=1)
+            msc_checkerboard_non_rep_all.append(checkerboard_sequence)
+        else:
+            raise ValueError(f"Unknown sequence id: {sequence}")
+
+    # >> Store the checkerboard sequences
+    print("Storing the checkerboard sequences...")
+    np.save(cc_checkerboard_sequence_sta_fp, np.array(cc_checkerboard_non_rep_all))
+    np.save(msc_checkerboard_sequence_sta_fp, np.array(msc_checkerboard_non_rep_all))
