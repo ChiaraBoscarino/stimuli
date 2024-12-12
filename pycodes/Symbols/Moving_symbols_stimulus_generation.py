@@ -20,11 +20,11 @@ VISUALIZE_STIMULUS_GIF = True
 # ---------------------------------------------------------------------------------------------- #
 # >> PARAMETERS
 # rootpath = "C:\\Users\\chiar\\Documents\\stimuli"
-rootpath = "I:\\STIMULI"
+rootpath = "D:\\STIMULI"
 output_root_folder = os.path.join(rootpath, "MovingSymbols")
 
 set_of_params = {
-    "STIMULUS_VERSION_ID": "MovingSymbols_DiagonalLB2TR",
+    "STIMULUS_VERSION_ID": "Horizontal_BOTTOM_L2R",
     "RIG_ID": 1,
     "mea_size": 1530,  # in µm
 
@@ -45,7 +45,11 @@ set_of_params = {
     "symbol_trajectories": {
                 # "Trj1": [(0.5, 0.5), (0.6, 0.3), (0.5, 0.5), (0.6, 0.6), (0.3, 0.7), (0.3, 0.3)],
                 # "Horizontal": [(0.15, 0.37), (0.85, 0.37)],
-                "Diagonal": [(0.2, 0.8), (0.8, 0.2)],
+                # "DiagonalBL2TR": [(0.2, 0.8), (0.8, 0.2)],
+                # "DiagonalTL2BR": [(0.2, 0.2), (0.8, 0.8)],
+                # "Horizontal_TOP_L2R": [(0.15, 0.37), (0.85, 0.37)],
+                # "Horizontal_CENTER_L2R": [(0.15, 0.5), (0.85, 0.5)],
+                "Horizontal_BOTTOM_L2R": [(0.15, 0.63), (0.85, 0.63)],
                 },
     "symbol_speeds": [50],  # pixels/s
     "fixation_time": 0,  # seconds
@@ -206,7 +210,7 @@ def main():
     # -- Total stimulus duration
     tot_stim_duration_s = (np.sum([np.sum(np.array(list(tjx_durations.values())) + s2s_transition_time) for speed, tjx_durations in trj_duration.items()])
                            * len(symbols) * len(symbol_sizes_um) * nreps + initial_adaptation)
-    tot_stim_duration_frames = int(tot_stim_duration_s * stimulus_frequency)
+    tot_stim_duration_frames = int(np.round(tot_stim_duration_s * stimulus_frequency))
 
     # - User confirmation
     report_string = (f"\n>> Generating Moving Symbols stimulus (Version ID {Stimulus_ID})\n"
