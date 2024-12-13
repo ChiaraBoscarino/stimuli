@@ -10,11 +10,11 @@ from pycodes.modules import gif
 # ---------------------------------------------------------------------------------------------- #
 # >> CODE MODULATORS
 VISUALIZE_TRAJECTORIES = True
-GENERATE_NPY = True
-STORE_SINGLE_SEQUENCE_GIF = True
-GENERATE_BIN = True
-GENERATE_VEC = True
-VISUALIZE_STIMULUS_GIF = True
+GENERATE_NPY = False
+STORE_SINGLE_SEQUENCE_GIF = False
+GENERATE_BIN = False
+GENERATE_VEC = False
+VISUALIZE_STIMULUS_GIF = False
 # ---------------------------------------------------------------------------------------------- #
 
 # ---------------------------------------------------------------------------------------------- #
@@ -24,7 +24,7 @@ rootpath = "D:\\STIMULI"
 output_root_folder = os.path.join(rootpath, "MovingSymbols")
 
 set_of_params = {
-    "STIMULUS_VERSION_ID": "Horizontal_BOTTOM_L2R",
+    "STIMULUS_VERSION_ID": "Horizontal_TOP_L2R",
     "RIG_ID": 1,
     "mea_size": 1530,  # in µm
 
@@ -47,9 +47,9 @@ set_of_params = {
                 # "Horizontal": [(0.15, 0.37), (0.85, 0.37)],
                 # "DiagonalBL2TR": [(0.2, 0.8), (0.8, 0.2)],
                 # "DiagonalTL2BR": [(0.2, 0.2), (0.8, 0.8)],
-                # "Horizontal_TOP_L2R": [(0.15, 0.37), (0.85, 0.37)],
+                "Horizontal_TOP_L2R": [(0.15, 0.37), (0.85, 0.37)],
                 # "Horizontal_CENTER_L2R": [(0.15, 0.5), (0.85, 0.5)],
-                "Horizontal_BOTTOM_L2R": [(0.15, 0.63), (0.85, 0.63)],
+                # "Horizontal_BOTTOM_L2R": [(0.15, 0.63), (0.85, 0.63)],
                 },
     "symbol_speeds": [50],  # pixels/s
     "fixation_time": 0,  # seconds
