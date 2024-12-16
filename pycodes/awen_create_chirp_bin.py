@@ -1,5 +1,5 @@
 import sys
-sys.path.append('/home/awen/shared') #this is where we put all the functions.py
+# sys.path.append('/home/awen/shared') #this is where we put all the functions.py
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -41,7 +41,8 @@ plt.show()
 
 #%% SAVING
 
-path="/home/awen/Documents/Stims/euler/"
+# path="/home/awen/Documents/Stims/euler/"
+path="D:\\STIMULI\\Chirp\\"
 
 filename="chirp-MEA1-50Hz"
 
@@ -52,7 +53,7 @@ bin_file = BinFile(path+filename+".bin",
                    stimulus_dimensions,
                    stimulus_dimensions,
                    nb_images=n_patterns,
-                   reverse=False,
+                   reverse=True,
                    mode='w')
 
 
