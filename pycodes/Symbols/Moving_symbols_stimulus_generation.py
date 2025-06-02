@@ -10,8 +10,8 @@ from pycodes.modules import gif
 # ---------------------------------------------------------------------------------------------- #
 # >> CODE MODULATORS
 VISUALIZE_TRAJECTORIES = True
-GENERATE_NPY = False
-STORE_SINGLE_SEQUENCE_GIF = False
+GENERATE_NPY = True
+STORE_SINGLE_SEQUENCE_GIF = True  # (to run this GENERATE_NPY = True)
 GENERATE_BIN = False
 GENERATE_VEC = False
 VISUALIZE_STIMULUS_GIF = False
@@ -19,23 +19,24 @@ VISUALIZE_STIMULUS_GIF = False
 
 # ---------------------------------------------------------------------------------------------- #
 # >> PARAMETERS
-# rootpath = "C:\\Users\\chiar\\Documents\\stimuli"
-rootpath = "D:\\STIMULI"
+rootpath = "C:\\Users\\cboscarino\\Documents\\GitHub\\stimuli"
+# rootpath = "D:\\STIMULI"
 output_root_folder = os.path.join(rootpath, "MovingSymbols")
+general_utils.make_dir(output_root_folder)
 
 set_of_params = {
-    "STIMULUS_VERSION_ID": "Horizontal_TOP_L2R",
+    "STIMULUS_VERSION_ID": "MovSyb_for_ppt",
     "RIG_ID": 1,
     "mea_size": 1530,  # in µm
 
     "pixel_size": 3.5,  # in µm per pixel
-    "stimulus_frequency": 15,  # Hz
+    "stimulus_frequency": 40,  # Hz
 
-    "SA_sq_dim": 768,  # pixels
+    "SA_sq_dim": 100,  # pixels
 
     # - Symbols
-    "symbols": ['F', 'T', 'I'],
-    "symbol_sizes_um": [60, 120, 180, 300, 420],  # µm
+    "symbols": ['E'],
+    "symbol_sizes_um": [50, 150],  # µm
     "symbol_color": 1,
     "background_color": 0,
 
@@ -47,9 +48,10 @@ set_of_params = {
                 # "Horizontal": [(0.15, 0.37), (0.85, 0.37)],
                 # "DiagonalBL2TR": [(0.2, 0.8), (0.8, 0.2)],
                 # "DiagonalTL2BR": [(0.2, 0.2), (0.8, 0.8)],
-                "Horizontal_TOP_L2R": [(0.15, 0.37), (0.85, 0.37)],
+                # "Horizontal_TOP_L2R": [(0.15, 0.37), (0.85, 0.37)],
                 # "Horizontal_CENTER_L2R": [(0.15, 0.5), (0.85, 0.5)],
                 # "Horizontal_BOTTOM_L2R": [(0.15, 0.63), (0.85, 0.63)],
+                "Random": [(0.25, 0.25), (0.6, 0.3),(0.75, 0.63), (0.5, 0.6), (0.25, 0.7), (0.75,0.75), (0.25, 0.25), (0.6, 0.3),(0.75, 0.63), (0.5, 0.6), (0.25, 0.7), (0.75,0.75)],
                 },
     "symbol_speeds": [50],  # pixels/s
     "fixation_time": 0,  # seconds
@@ -241,6 +243,7 @@ def main():
         return
 
     # ---------------------------------------------------------------------------------------------- #
+
     general_utils.make_dir(output_folder)
     general_utils.make_dir(files_folder)
     general_utils.write_json(parameters, param_path)
@@ -265,7 +268,7 @@ def main():
                         # Generate and store stack of frames
                         npy_stack_frames = np.array([
                             symbol_stimuli_utils.generate_symbol_frame(symbol, SA_x_size_px, SA_y_size_px, symbol_size_px,
-                                                                       symb_center, symbol_color, background_color)
+                                                                       symb_center, symbol_color, background_color, digit_type=dtype)
                             for symb_center in trx
                         ], dtype=dtype)
 
