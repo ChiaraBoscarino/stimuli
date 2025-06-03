@@ -5,12 +5,12 @@ import matplotlib.pyplot as plt
 from pycodes.modules import general_utils, gif
 
 n_seq_to_show = 10  # spots
-stimulus_version = "multisize_spot_tiling_stimulus_V6_MEA1_45error_8reps"
-stimulus_name = "multisize_spot_tiling_stimulus_radial_error_45_V6_MEA1"
-root = "C:\\Users\\chiar\\Documents\\rgc_typing"
+stimulus_version = "MSSpots_V7_MEA1_30error_12reps_4Hz"
+stimulus_name = "MSSpots_V7_MEA1_30error_12reps_4Hz"
+stim_dir = '/home/idv-equipe-s8/Documents/GitHub/hiOsight/stimuli/MultisizeSpots'
 
 sequence_duration_s = 2  # seconds
-frequency = 40  # Hz
+frequency = 4  # Hz
 black_frame_fid = 0
 
 
@@ -21,7 +21,7 @@ def main():
     vec_file = f"{stimulus_name}.vec"
     spot_reference_filename = f"{stimulus_name}_spot_reference.vec"
 
-    stimulus_folder = os.path.join(root, "stimuli", stimulus_version)
+    stimulus_folder = os.path.join(stim_dir, stimulus_version)
     vec_fp = os.path.join(stimulus_folder, vec_file)
     spot_reference_fp = os.path.join(stimulus_folder, spot_reference_filename)
     frames_stack_fp = os.path.join(stimulus_folder, frame_stack_file)
