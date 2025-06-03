@@ -3,7 +3,7 @@ import numpy as np
 from tqdm.auto import tqdm
 from pycodes.modules import gif
 
-seq_to_show = [1, 2, 3, 4, 92, 93, 94, 95]  # seconds
+seq_to_show = [1, 2, 94, 95]  # seconds
 stimulus_version = "MSF_checkerboard_V11_MEA1_732744"
 # stimulus_version = "MSF_checkerboard_V9"
 stimulus_name = f"{stimulus_version}_4Hz"
@@ -14,6 +14,7 @@ files_folder = os.path.join(stimulus_folder, "files")
 vec_file = f"{stimulus_name}.vec"
 
 frequency = 4  # Hz
+dt = 1000 / frequency  # ms
 sequence_duration_frames = 60 + 90  # frames
 sid_rep_seq_cc = 0
 sid_rep_seq_msc = 91
@@ -54,7 +55,7 @@ def main():
     stack_to_show = np.array(stack_to_show)
     print(f"Storing gif with {len(stack_to_show)} frames...")
     gif_fp = os.path.join(stimulus_folder, f"{stimulus_name}_sequence_some_sequences.gif")
-    gif.create_gif(stack_to_show, gif_fp, dt=25, loop=1)
+    gif.create_gif(stack_to_show, gif_fp, dt=dt, loop=1)
 
     return
 
