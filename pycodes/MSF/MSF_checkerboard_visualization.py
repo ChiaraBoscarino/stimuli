@@ -1,13 +1,17 @@
 import os
 import numpy as np
-
+from tqdm.auto import tqdm
 from pycodes.modules import gif
 
 seq_to_show = [1, 2, 3, 4, 92, 93, 94, 95]  # seconds
-stimulus_version = "MSF_checkerboard_V10_386208"
+stimulus_version = "MSF_checkerboard_V11_MEA1_732744"
 # stimulus_version = "MSF_checkerboard_V9"
 stimulus_name = f"{stimulus_version}_4Hz"
-root = "C:\\Users\\chiar\\Documents\\rgc_typing"
+# root = "C:\\Users\\chiar\\Documents\\rgc_typing"
+root = '/home/idv-equipe-s8/Documents/GitHub/hiOsight'  # !! SET THIS for linux
+stimulus_folder = os.path.join(root, "stimuli", 'MSF', stimulus_version)
+files_folder = os.path.join(stimulus_folder, "files")
+vec_file = f"{stimulus_name}.vec"
 
 frequency = 4  # Hz
 sequence_duration_frames = 60 + 90  # frames
@@ -18,10 +22,6 @@ max_sid = 181
 
 def main():
 
-    stimulus_folder = os.path.join(root, "stimuli", stimulus_version)
-    files_folder = os.path.join(stimulus_folder, "files")
-
-    vec_file = f"{stimulus_name}.vec"
     vec_fp = os.path.join(stimulus_folder, vec_file)
     vec_table = np.genfromtxt(vec_fp)
 
@@ -38,7 +38,7 @@ def main():
     frames_sequence_rep_msc = np.load(os.path.join(files_folder, f"msc_sequence_0.npy"))
 
     stack_to_show = []
-    for sid in seq_to_show:
+    for sid in tqdm(seq_to_show, desc="Generating gif"):
         if sid_rep_seq_cc < sid < sid_rep_seq_msc:
             frames_sequence = np.load(os.path.join(files_folder, f"cc_sequence_{sid}.npy"))
             frames_sequence_rep = frames_sequence_rep_cc
@@ -52,6 +52,7 @@ def main():
         for x in frames_sequence_rep: stack_to_show.append(x)
         for x in frames_sequence: stack_to_show.append(x)
     stack_to_show = np.array(stack_to_show)
+    print(f"Storing gif with {len(stack_to_show)} frames...")
     gif_fp = os.path.join(stimulus_folder, f"{stimulus_name}_sequence_some_sequences.gif")
     gif.create_gif(stack_to_show, gif_fp, dt=25, loop=1)
 
