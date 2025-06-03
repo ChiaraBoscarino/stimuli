@@ -60,8 +60,7 @@ from multisize_spot_stimulus_02_0_generation_parameters import *
 from pycodes.modules import general_utils, visual_utils
 import os
 
-stimuli_dir = os.path.join(root, 'stimuli')
-STIM_DIR = os.path.join(stimuli_dir, STIM_DIR)
+STIM_DIR = os.path.join(stimuli_dir, STIM_ID)
 general_utils.make_dir(STIM_DIR)
 coordinates_fp = os.path.join(STIM_DIR, coordinates_filename+".pkl")
 frame_stack_fp = os.path.join(STIM_DIR, frame_stack_filename+".npy")
