@@ -47,14 +47,14 @@ NEXT --> go to multisize_spot_stimulus_02_1_generation.py to generate the stimul
 # 1. PARAMETERS
 # Stimulus parameters
 SIZES = [150, 250, 600, 1200]  # diameter (microns)
-TARGET_AREA_WIDTH = 1500  # microns
-TARGET_AREA_HEIGHT = 1500  # microns
+TARGET_AREA_WIDTH = 500  # microns
+TARGET_AREA_HEIGHT = 500  # microns
 
 ON_DURATION = 1  # (seconds)
 OFF_DURATION = 1  # (seconds)
 INITIAL_DELAY = 0  # (seconds)
 
-MAX_ADMITTED_ALIGNMENT_MARGIN_PTGs = [0.45]  # *100% of spot size (or [0.1, 0.15, 0.2, 0.25,  0.3])
+MAX_ADMITTED_ALIGNMENT_MARGIN_PTGs = [0.3, 0.4, 0.45]  # *100% of spot size (or [0.1, 0.15, 0.2, 0.25,  0.3])
 Ks = range(2, 15, 2)  # number of repetitions of each spot size (or range(1,15))
 
 # Output analysis parameters
@@ -74,7 +74,7 @@ TITLEPAD = 30
 
 # Reports to show
 SHOW_DURATION_ESTIMATION = True
-SHOW_SINGLE_ARRANGEMENT = True
+SHOW_SINGLE_ARRANGEMENT = False
 
 # if SHOW_SINGLE_ARRANGEMENT select the MAX_ADMITTED_ALIGNMENT_MARGIN_PTG
 max_admitted_alignment_margin_ptg = 0.45
@@ -85,7 +85,7 @@ SPOT_STIMULUS_DIMENSION_px = 768
 PIXEL_SIZE = 3.5
 N_ELECTRODES = 16
 ELECTRODE_SPACING = 100  # microns
-MEA_SIZE_um = 1530  # N_ELECTRODES * ELECTRODE_SPACING
+MEA_SIZE_um = 458  # (N_ELECTRODES -1) * ELECTRODE_SPACING + ELECTRODE_DIAMETER
 SPOT_STIMULUS_DIMENSION_um = SPOT_STIMULUS_DIMENSION_px * PIXEL_SIZE
 SPOT_STIMULUS_CENTER_COORDINATE_um = SPOT_STIMULUS_DIMENSION_um / 2  # center of the stimulus (starting from the top left corner of the stimulus)
 SPOT_STIMULUS_TARGET_AREA_ORIGIN_COORDINATE_um = SPOT_STIMULUS_CENTER_COORDINATE_um - MEA_SIZE_um / 2  #
@@ -93,7 +93,7 @@ SPOT_STIMULUS_TARGET_AREA_ORIGIN_COORDINATE_um = SPOT_STIMULUS_CENTER_COORDINATE
 # 2. ANALYSIS
 from pycodes.modules.multisize_spot_stimulus_utils import *
 import pandas as pd
-import matplotlib.pyplot as plt
+
 
 plt.rc('axes', labelsize=LABELSIZE)
 plt.rc('axes', titlesize=TITLESIZE)
@@ -187,4 +187,4 @@ if SHOW_DURATION_ESTIMATION:
     ax.grid(axis="y", alpha=0.5)
     ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), ncol=1, borderaxespad=0, frameon=False)
     fig.tight_layout()
-    fig.show()
+    plt.show()
