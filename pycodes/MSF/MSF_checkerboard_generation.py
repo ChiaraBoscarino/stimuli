@@ -1,7 +1,6 @@
 import random
 import math
 import struct
-
 from tqdm.auto import tqdm
 import copy
 
@@ -118,22 +117,22 @@ Creates a stimulus composed of the classic checkerboard (cc) and the Multi Scale
 
 
 """
-gen_cc_npy = False
-gen_msc_npy = False
-gen_bin = False
-gen_vec = False
+gen_cc_npy = True
+gen_msc_npy = True
+gen_bin = True
+gen_vec = True
 gen_complete_seq_per_sta = True
 
 # Parameters
 
 # Global
 stimulus_random_number = np.random.randint(0, 1000000)
-msf_id = f"MSF_checkerboard_V10_MEA1_{stimulus_random_number}"
-root = "C:\\Users\\chiar\\Documents\\rgc_typing"  # !! SET THIS for windows
-# root = r'/home/idv-equipe-s8/Documents/GitHub/rgc_typing'  # !! SET THIS for linux
+msf_id = f"MSF_checkerboard_V11_MEA1_{stimulus_random_number}"
+# root = "C:\\Users\\chiar\\Documents\\rgc_typing"  # !! SET THIS for windows
+root = '/home/idv-equipe-s8/Documents/GitHub/hiOsight'  # !! SET THIS for linux
 stimuli_dir = os.path.join(root, 'stimuli')
-# msf_dir = os.path.join(stimuli_dir, msf_id)
-msf_dir = "I:\\STIMULI\\MSF\\MSF_checkerboard_V10_MEA1_4Hz"
+msf_dir = os.path.join(stimuli_dir, 'MSF', msf_id)
+# msf_dir = "I:\\STIMULI\\MSF\\MSF_checkerboard_V10_MEA1_4Hz"
 files_dir = str(os.path.join(msf_dir, "files"))
 make_dir(msf_dir)
 make_dir(files_dir)
@@ -143,14 +142,14 @@ pixel_size = 3.5  # µm
 rig_id = 1
 
 # Classic checkerboard parameters
-cc_check_size_mum = 56  # µm
+cc_check_size_mum = 112  # µm
 cc_n_non_rep_seq = 90  # sequences
 cc_n_frames_in_rep_seq = 60  # images
 cc_n_frames_in_non_rep_seq = 90  # images
 cc_n_frames_full_seq = cc_n_frames_in_rep_seq + cc_n_frames_in_non_rep_seq
 
 # MSF checkerboard
-msc_check_sizes_mum = [56, 112, 224, 448, 896, 1344]  # µm (list)
+msc_check_sizes_mum = [112, 224, 448, 896, 1344]  # µm (list)
 msc_n_non_rep_seq = 90  # sequences
 msc_n_frames_in_rep_seq = 60  # images
 msc_n_frames_in_non_rep_seq = 90  # images
@@ -343,15 +342,13 @@ if gen_bin:
                        mode='w')
 
     # Write cc sequences
-    for i_sequence in tqdm(range(cc_n_rep_seq + cc_n_non_rep_seq),
-                           desc="Writing cc sequences to bin"):
+    for i_sequence in tqdm(range(cc_n_rep_seq + cc_n_non_rep_seq), desc="Writing cc sequences to bin"):
         sequence = np.load(os.path.join(files_dir, f"cc_sequence_{i_sequence}.npy"))
         for i_frame in range(sequence.shape[0]):
             bin_file.append_frame(sequence[i_frame, :, :])
 
     # Write msc sequences
-    for i_sequence in tqdm(range(msc_n_rep_seq + msc_n_non_rep_seq),
-                           desc="Writing msc sequences to bin"):
+    for i_sequence in tqdm(range(msc_n_rep_seq + msc_n_non_rep_seq), desc="Writing msc sequences to bin"):
         sequence = np.load(os.path.join(files_dir, f"msc_sequence_{i_sequence}.npy"))
         for i_frame in range(sequence.shape[0]):
             bin_file.append_frame(sequence[i_frame, :, :])
@@ -441,7 +438,7 @@ if gen_vec:
 
 
 # Generate the complete sequences for the STA
-vec_fp_source = os.path.join(msf_dir, "MSF_checkerboard_V10_MEA1_556653_4Hz.vec")
+vec_fp_source = vec_fp
 cc_checkerboard_sequence_sta_fp = os.path.join(msf_dir, "cc_checkerboard_non_rep_all.npy")
 msc_checkerboard_sequence_sta_fp = os.path.join(msf_dir, "msc_checkerboard_non_rep_all.npy")
 if gen_complete_seq_per_sta:
