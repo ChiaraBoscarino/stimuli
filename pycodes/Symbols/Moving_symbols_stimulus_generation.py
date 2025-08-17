@@ -55,7 +55,7 @@ set_of_params = {
                 },
     "symbol_speeds": [50],  # pixels/s
     "fixation_time": 0,  # seconds
-    "s2s_transition_time": 0,  # seconds
+    "s2s_transition_time": 0,  # seconds  # KEEP TO 0 - NOT IMPLEMENTED IN THE CODE
 
     "initial_adaptation": 0,  # seconds
 
