@@ -8,8 +8,8 @@ from pycodes.modules import stimulus_utils
 
 # --> SETUP HERE PARAMS, PATHS TO STIMULI and MSF VERSION
 stimuli_dir = r'I:\STIMULI'
-from pycodes.MSF.MSF_checkerboard_V10_MEA1_556653_4Hz_parameters import *
-msf_dir = os.path.join(stimuli_dir,"MSF", "MSF_checkerboard_V10_MEA1_4Hz")
+from pycodes.MSF.MSF_checkerboard_V11_MEA1_732744_4Hz_parameters import *
+msf_dir = os.path.join(stimuli_dir,"MSF", "MSF_checkerboard_V11_MEA1_4Hz")
 pixel_size = 3.5  # µm
 
 # AUTOMATIC SETUP
