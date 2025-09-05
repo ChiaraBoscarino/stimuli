@@ -8,9 +8,9 @@ from pycodes.modules import general_utils, symbol_stimuli_utils
 
 # ---------------------------------------------------------------------------------------------- #
 # >> CODE MODULATORS
-GENERATE_NPY = True
-GENERATE_BIN = True
-GENERATE_VEC = True
+GENERATE_NPY = False
+GENERATE_BIN = False
+GENERATE_VEC = False
 VISUALIZE_STIMULUS_GIF = True
 # ---------------------------------------------------------------------------------------------- #
 
@@ -20,21 +20,23 @@ VISUALIZE_STIMULUS_GIF = True
 rootpath = "I:\\STIMULI"
 output_root_folder = os.path.join(rootpath, "FlashedSymbols")
 
+lp, up = .46, .54
+
 set_of_params = {
-    "STIMULUS_VERSION_ID": "FlashedSymbols_67_300ms_TopRight",
+    "STIMULUS_VERSION_ID": "FlashedSymbols_67_300ms_Central_4SQ",
     "RIG_ID": 1,
-    "mea_size": 1530,  # in µm
+    "mea_size": 480,  # in µm
 
     "pixel_size": 3.5,  # in µm per pixel
     "stimulus_frequency": 15,  # Hz
 
     "SA_sq_dim": 768,  # pixels
 
-    "symbols": ['F', 'T', 'I'],
+    "symbols": ['F', 'T', 'I', 'E', 'E_hflip', 'E_p90deg', 'E_m90deg'],
     "symbol_sizes_um": [150, 300, 450],  # µm
-    "symbol_locations": {"150um": [(0.37, 0.37), (0.37, 0.63), (0.63, 0.37), (0.63, 0.63)],
-                         "300um": [(0.37, 0.37), (0.37, 0.63), (0.63, 0.37), (0.63, 0.63)],
-                         "450um": [(0.37, 0.37), (0.37, 0.63), (0.63, 0.37), (0.63, 0.63)]},
+    "symbol_locations": {"150um": [(lp, lp), (lp, up), (up, lp), (up, up)],
+                         "300um": [(lp, lp), (lp, up), (up, lp), (up, up)],
+                         "450um": [(lp, lp), (lp, up), (up, lp), (up, up)]},
     "onset_time": 0.067,  # seconds
     "offset_time": 0.300,  # seconds
     "initial_adaptation": 1,  # seconds
@@ -264,6 +266,11 @@ def main():
         complete_stack_frame = np.array([frame_stack[int(f), :, :] for f in frames_to_vec])
 
         assert complete_stack_frame.shape[0] == tot_n_frames, f"Error: {complete_stack_frame.shape[0]} != {tot_n_frames}"
+
+        cut = 60 * stimulus_frequency  # visualize only the first 60 seconds
+        if complete_stack_frame.shape[0] > cut:
+            complete_stack_frame = complete_stack_frame[:cut, :, :]
+            print(f" (cut to the first {cut} frames)")
 
         gif_fp = os.path.join(output_folder, f"{Stimulus_ID}.gif")
         gif.create_gif(complete_stack_frame, gif_fp, dt=dt * 1000, loop=1)
