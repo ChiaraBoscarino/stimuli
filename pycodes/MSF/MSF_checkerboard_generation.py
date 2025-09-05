@@ -117,10 +117,10 @@ Creates a stimulus composed of the classic checkerboard (cc) and the Multi Scale
 
 
 """
-gen_cc_npy = False
-gen_msc_npy = False
-gen_bin = False
-gen_vec = False
+gen_cc_npy = True
+gen_msc_npy = True
+gen_bin = True
+gen_vec = True
 gen_complete_seq_per_sta = True
 
 # Parameters
