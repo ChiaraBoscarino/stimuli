@@ -117,25 +117,20 @@ Creates a stimulus composed of the classic checkerboard (cc) and the Multi Scale
 
 
 """
-gen_cc_npy = True
-gen_msc_npy = True
-gen_bin = True
-gen_vec = True
+gen_cc_npy = False
+gen_msc_npy = False
+gen_bin = False
+gen_vec = False
 gen_complete_seq_per_sta = True
 
 # Parameters
 
 # Global
 stimulus_random_number = np.random.randint(0, 1000000)
-msf_id = f"MSF_checkerboard_V11_MEA1_{stimulus_random_number}"
-# root = "C:\\Users\\chiar\\Documents\\rgc_typing"  # !! SET THIS for windows
-root = '/home/idv-equipe-s8/Documents/GitHub/hiOsight'  # !! SET THIS for linux
-stimuli_dir = os.path.join(root, 'stimuli')
-msf_dir = os.path.join(stimuli_dir, 'MSF', msf_id)
-# msf_dir = "I:\\STIMULI\\MSF\\MSF_checkerboard_V10_MEA1_4Hz"
-files_dir = str(os.path.join(msf_dir, "files"))
-make_dir(msf_dir)
-make_dir(files_dir)
+stim_id = f"MSF_checkerboard_V12_MEA1"
+msf_id = f"{stim_id}_{stimulus_random_number}"
+
+stimuli_dir = r'I:\STIMULI'  # Change this to your stimuli directory
 
 n_pixels = 768  # pixels
 pixel_size = 3.5  # µm
@@ -157,7 +152,12 @@ msc_n_frames_full_seq = msc_n_frames_in_rep_seq + msc_n_frames_in_non_rep_seq
 
 # vec
 n_blocks = 3
-framerate = 4
+framerate = 40 # Hz
+
+msf_dir = os.path.join(stimuli_dir, 'MSF', f"{stim_id}_{framerate}Hz")
+files_dir = str(os.path.join(msf_dir, "files"))
+make_dir(msf_dir)
+make_dir(files_dir)
 
 # Hardcoded parameters: don't change without adapting the codes accordingly
 cc_n_rep_seq = 1  # sequences
@@ -439,8 +439,11 @@ if gen_vec:
 
 # Generate the complete sequences for the STA
 vec_fp_source = vec_fp
-cc_checkerboard_sequence_sta_fp = os.path.join(msf_dir, "cc_checkerboard_non_rep_all.npy")
-msc_checkerboard_sequence_sta_fp = os.path.join(msf_dir, "msc_checkerboard_non_rep_all.npy")
+cc_checkerboard_rep_sequence_sta_fp = os.path.join(msf_dir, "cc_chk_rep.npy")
+msc_checkerboard_rep_sequence_sta_fp = os.path.join(msf_dir, "msc_chk_rep.npy")
+cc_checkerboard_unr_sequence_sta_fp = os.path.join(msf_dir, "cc_checkerboard_non_rep_all.npy")
+msc_checkerboard_unr_sequence_sta_fp = os.path.join(msf_dir, "msc_checkerboard_non_rep_all.npy")
+
 if gen_complete_seq_per_sta:
     print("Generating complete sequences for the STA...")
 
@@ -455,6 +458,7 @@ if gen_complete_seq_per_sta:
     msc_common_size = np.gcd.reduce(msc_check_sizes_px.astype(int))
 
     # >> Extract the sequences from vec
+    print(f"Loading the vec file from {vec_fp_source}...")
     vec_file = np.genfromtxt(vec_fp_source)
     tot_num_frames = int(vec_file[0, 1])
     frame_index_sequence = vec_file[1:, 1]
@@ -472,10 +476,22 @@ if gen_complete_seq_per_sta:
     # >> Iterate sequences and build vec + checkerboard sequences
     cc_checkerboard_non_rep_all = []
     msc_checkerboard_non_rep_all = []
+    cc_chk_rep = None
+    msc_chk_rep = None
     for sequence in tqdm(sequences_ids, desc="Building complete sequences"):
         # Update sequence to vec
-        if sequence == cc_repeated_id or sequence == msc_repeated_id:
-            continue
+        if sequence == cc_repeated_id:
+            if cc_chk_rep is not None: continue
+            fp = os.path.join(str(files_dir), f"cc_sequence_{cc_repeated_id}.npy")
+            cc_chk_rep = stimulus_utils.get_checkerboard_sequence(fp, rescale=True,
+                                                                  n_pixel_per_check_old=cc_check_size,
+                                                                  n_pixel_per_check_new=1)
+        elif sequence == msc_repeated_id:
+            if msc_chk_rep is not None: continue
+            fp = os.path.join(str(files_dir), f"msc_sequence_{msc_repeated_id - cc_total_n_seq}.npy")
+            msc_chk_rep = stimulus_utils.get_checkerboard_sequence(fp, rescale=True,
+                                                                   n_pixel_per_check_old=msc_common_size,
+                                                                   n_pixel_per_check_new=1)
         elif sequence in cc_non_repeated_id:
             # add the sequence to the cc_checkerboard_non_rep_all list
             fp = os.path.join(str(files_dir), f"cc_sequence_{sequence}.npy")
@@ -483,6 +499,7 @@ if gen_complete_seq_per_sta:
                                                                              n_pixel_per_check_old=cc_check_size,
                                                                              n_pixel_per_check_new=1)
             cc_checkerboard_non_rep_all.append(checkerboard_sequence)
+
         elif sequence in msc_non_repeated_id:
             # add the sequence to the msc_checkerboard_non_rep_all list
             # NB: since the msc sequences are stored with seq_id going from 0 (the repeated one) to 90,
@@ -497,6 +514,18 @@ if gen_complete_seq_per_sta:
             raise ValueError(f"Unknown sequence id: {sequence}")
 
     # >> Store the checkerboard sequences
+    cc_chk_rep = np.array(cc_chk_rep)
+    msc_chk_rep = np.array(msc_chk_rep)
+    cc_checkerboard_non_rep_all = np.array(cc_checkerboard_non_rep_all)
+    msc_checkerboard_non_rep_all = np.array(msc_checkerboard_non_rep_all)
+
+    print(f"cc_chk_rep: {cc_chk_rep.shape}")
+    print(f"msc_chk_rep: {msc_chk_rep.shape}")
+    print(f"cc_checkerboard_non_rep_all: {cc_checkerboard_non_rep_all.shape}")
+    print(f"msc_checkerboard_non_rep_all: {msc_checkerboard_non_rep_all.shape}")
+
     print("Storing the checkerboard sequences...")
-    np.save(cc_checkerboard_sequence_sta_fp, np.array(cc_checkerboard_non_rep_all))
-    np.save(msc_checkerboard_sequence_sta_fp, np.array(msc_checkerboard_non_rep_all))
+    np.save(cc_checkerboard_rep_sequence_sta_fp, cc_chk_rep)
+    np.save(msc_checkerboard_rep_sequence_sta_fp, msc_chk_rep)
+    np.save(cc_checkerboard_unr_sequence_sta_fp, cc_checkerboard_non_rep_all)
+    np.save(msc_checkerboard_unr_sequence_sta_fp, msc_checkerboard_non_rep_all)
